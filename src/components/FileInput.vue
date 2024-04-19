@@ -1,25 +1,26 @@
 <template>
   <div class="file-input">
     <h4 class="file-input__label">
-      {{ labelText }}
+      Label
     </h4>
     <div class="file-input__form">
       <div>
         <FileInputButton
-            :button-text="buttonText"
+            :button-text="fileButtonText"
             @file-selected="onFileSelect($event)"
-            @cancel="onCancel"
+            @cancel="isCancelled = true"
+            @click="processClickFunc"
         />
       </div>
       <div class="file-input__file-info">
         <LoadingSpinner :loading="loading"/>
-        <span :class="fileName ? 'file_input__file-name_loaded' : 'file_input__file-name_init'">
+        <span :class="fileName ? 'file_input__file-name_loaded' : 'file_input__file-name'">
           {{ fileName ?? 'Файл не выбран' }}
         </span>
       </div>
     </div>
-    <h4 class="file-input__hint">
-      {{ hintText }}
+    <h4 :class="isCancelled ? 'file-input__hint_cancelled' : 'file-input__hint'">
+      {{ isCancelled ? 'Error message' : 'Hint text' }}
     </h4>
   </div>
 </template>
@@ -27,37 +28,58 @@
 <script setup lang="ts">
 import FileInputButton from "./FileInputButton.vue";
 import LoadingSpinner from "./LoadingSpinner.vue";
-import {computed, ref} from "vue";
+import { ref, watch } from "vue";
 
-const fileName = ref<string | null>(null);
+const timer = ref<number | null>(null);
 
 const loading = ref<boolean>(false);
 
-const labelText = ref('Label');
-const hintText = ref('Hint text');
+const processClickFunc = ref();
 
-const buttonText = computed(() => {
-  if (loading.value) {
-    return 'Отменить';
+const fileName = ref<string | null>(null);
+
+const fileButtonText = ref('Выбрать файл');
+
+const fileInputRef = ref();
+
+const isCancelled = ref(false);
+
+watch([loading, fileName], () => {
+  if (!loading.value && !fileName.value) {
+    processClickFunc.value = undefined;
+    fileButtonText.value = 'Выбрать файл';
   }
-  else if (!loading.value && fileName.value) {
-    return 'Удалить';
+  else if (loading.value) {
+    processClickFunc.value = onLoadCancel;
+    fileButtonText.value = 'Отменить';
   }
   else {
-    return 'Выбрать файл';
+    processClickFunc.value = onFileDelete;
+    fileButtonText.value = 'Удалить';
   }
+  isCancelled.value = false;
 });
 
-const onFileSelect = (e: Event) => {
+const onFileSelect = (inputRef: any) => {
   loading.value = true;
-  setTimeout(() => {
+  fileName.value = inputRef.files![0].name;
+  timer.value = setTimeout(() => {
     loading.value = false;
-    fileName.value = (e.target as HTMLInputElement)!.files![0].name;
+    fileInputRef.value = inputRef;
   }, 1000)
 };
 
-const onCancel = () => {
+const onFileDelete = (e: Event) => {
+  e.preventDefault();
+  fileInputRef.value.value = '';
+  fileName.value = null;
+};
 
+const onLoadCancel = (e: Event) => {
+  clearTimeout(timer.value as number);
+  e.preventDefault();
+  fileName.value = null;
+  loading.value = false;
 };
 </script>
 
@@ -69,12 +91,12 @@ const onCancel = () => {
 .file-input__form {
   display: flex;
   column-gap: 1.2em;
-  margin: 1.5em 0;
+  margin: -0.5em 0;
 }
 
 .file-input__file-info {
   display: flex;
-  align-content: center;
+  align-items: center;
   column-gap: 0.5em;
 }
 
@@ -83,11 +105,16 @@ const onCancel = () => {
   color: #6B7280;
 }
 
+.file-input__hint_cancelled {
+  font-weight: normal;
+  color: #EF4848;
+}
+
 .file_input__file-name_loaded {
   color: #6B7280;
 }
 
-.file_input__file-name_init {
+.file_input__file-name {
   color: #9BA2AF;
 }
 </style>
