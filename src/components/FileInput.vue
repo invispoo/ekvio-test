@@ -1,9 +1,6 @@
 <template>
   <div class="file-input">
-    <h4
-      class="file-input__label"
-      role="heading"
-    >
+    <h4 role="heading">
       Label
     </h4>
     <div class="file-input__form">
@@ -40,15 +37,15 @@ const timer = ref<number | null>(null);
 
 const loading = ref<boolean>(false);
 
-const processClickFunc = ref();
+const processClickFunc = ref<(e: Event) => void | undefined>();
 
 const fileName = ref<string | null>(null);
 
-const fileButtonText = ref('Выбрать файл');
+const fileButtonText = ref<string>('Выбрать файл');
 
 const fileInputRef = ref();
 
-const isCancelled = ref(false);
+const isCancelled = ref<boolean>(false);
 
 watch([loading, fileName], () => {
   if (!loading.value && !fileName.value) {
@@ -108,10 +105,6 @@ const onLoadCancel = (e: Event) => {
   display: flex;
   align-items: center;
   column-gap: 0.5em;
-}
-
-.file-input__label {
-  font-weight: bold;
 }
 
 .file-input__hint {
