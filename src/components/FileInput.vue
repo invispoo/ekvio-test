@@ -1,6 +1,9 @@
 <template>
   <div class="file-input">
-    <h4 class="file-input__label">
+    <h4
+      class="file-input__label"
+      role="heading"
+    >
       Label
     </h4>
     <div class="file-input__form">
@@ -14,14 +17,17 @@
       </div>
       <div class="file-input__file-info">
         <LoadingSpinner :loading="loading"/>
-        <span :class="fileName ? 'file_input__file-name_loaded' : 'file_input__file-name'">
+        <p :class="fileName ? 'file_input__file-name_loaded' : 'file_input__file-name'">
           {{ fileName ?? 'Файл не выбран' }}
-        </span>
+        </p>
       </div>
     </div>
-    <h4 :class="isCancelled ? 'file-input__hint_cancelled' : 'file-input__hint'">
+    <p
+        id="hint"
+        :class="isCancelled ? 'file-input__hint_cancelled' : 'file-input__hint'"
+    >
       {{ isCancelled ? 'Error message' : 'Hint text' }}
-    </h4>
+    </p>
   </div>
 </template>
 
@@ -61,12 +67,16 @@ watch([loading, fileName], () => {
 });
 
 const onFileSelect = (inputRef: any) => {
-  loading.value = true;
-  fileName.value = inputRef.files![0].name;
-  timer.value = setTimeout(() => {
-    loading.value = false;
-    fileInputRef.value = inputRef;
-  }, 1000)
+  if (inputRef?.files[0]) {
+    fileName.value = inputRef.files[0].name;
+  }
+  if (fileName.value) {
+    loading.value = true;
+    timer.value = setTimeout(() => {
+      loading.value = false;
+      fileInputRef.value = inputRef;
+    }, 1000)
+  }
 };
 
 const onFileDelete = (e: Event) => {
@@ -98,6 +108,10 @@ const onLoadCancel = (e: Event) => {
   display: flex;
   align-items: center;
   column-gap: 0.5em;
+}
+
+.file-input__label {
+  font-weight: bold;
 }
 
 .file-input__hint {

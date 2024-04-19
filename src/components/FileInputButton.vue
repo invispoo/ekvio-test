@@ -2,19 +2,18 @@
     <label
         for="file-upload"
         class="file-input-button"
+        :aria-label="buttonText"
     >
       <input
           type="file"
           id="file-upload"
           ref="inputRef"
+          aria-describedby="hint"
           @change="emit('fileSelected', inputRef)"
           @cancel="emit('cancel')"
           @click="emit('click', $event)"
       >
-      <span
-          role="button"
-
-      >{{ buttonText }}</span>
+      <span role="button">{{ buttonText }}</span>
     </label>
 
 </template>
@@ -65,7 +64,8 @@ const inputRef = ref();
   box-shadow: none;
 }
 
-.file-input-button input[type=file]:focus + span {
+.file-input-button input[type=file]:focus + span,
+.file-input-button input[type=file]:focus-visible + span {
   outline: 2px solid #F0F1F2 !important;
 }
 

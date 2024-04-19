@@ -9,7 +9,7 @@ import FileInput from "./components/FileInput.vue";
 </script>
 
 <style scoped>
-* {
+main {
   font-family: sans-serif;
 }
 </style>
